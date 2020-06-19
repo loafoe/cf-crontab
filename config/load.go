@@ -34,6 +34,9 @@ func LoadFromEnv() ([]crontab.Task, error) {
 	for p := range parts {
 		base64FullConfig = base64FullConfig + p
 	}
+	if base64FullConfig == "" {
+		return tasks, nil
+	}
 	decoded, err := base64.StdEncoding.DecodeString(base64FullConfig)
 	if err != nil {
 		return tasks, err
