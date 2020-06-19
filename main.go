@@ -1,19 +1,19 @@
 package main
 
 import (
+	"code.cloudfoundry.org/cli/plugin"
 	"encoding/json"
 	"fmt"
 	"github.com/philips-labs/cf-crontab/config"
 	"github.com/philips-labs/cf-crontab/crontab"
 	"github.com/robfig/cron/v3"
-	"code.cloudfoundry.org/cli/plugin"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 )
 
-type GronPlugin struct {}
+type CrontabPlugin struct {}
 
-func (c *GronPlugin) GetMetadata() plugin.PluginMetadata {
+func (c *CrontabPlugin) GetMetadata() plugin.PluginMetadata {
 	return plugin.PluginMetadata{
 		Version: struct {
 			Major int
@@ -77,7 +77,7 @@ func (c *GronPlugin) GetMetadata() plugin.PluginMetadata {
 	}
 }
 
-func (c *GronPlugin) Run(cliConnection plugin.CliConnection, args []string) {
+func (c *CrontabPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	switch args[0] {
 	case "list-cron":
 		tasks, err := config.LoadFromEnv()
@@ -86,15 +86,41 @@ func (c *GronPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 			return
 		}
 		for i, task := range tasks {
-			fmt.Printf("%d: %v %v\n", i, task.Schedule, task.Job.Type)
+			fmt.Printf("%d: %v\n", i, task)
 		}
 	case "add-cron":
-		fmt.Println("TODO")
+		if len(args) < 2 {
+			fmt.Printf("need json file with tasks\n")
+			return
+		}
+		data, err := ioutil.ReadFile(args[1])
+		if err != nil {
+			fmt.Printf("error: %v\n", err)
+			return
+		}
+		var tasks []crontab.Task
+		err = json.Unmarshal(data, &tasks)
+		if err != nil {
+			fmt.Printf("error: %v\n", err)
+			return
+		}
+		for i, task := range tasks {
+			fmt.Printf("%d: %v\n", i, task)
+		}
 	case "remove-cron":
 		fmt.Println("TODO")
 	case "backup-cron":
-
-		fmt.Println("TODO")
+		tasks, err := config.LoadFromEnv()
+		if err != nil {
+			fmt.Printf("error: %v\n", err)
+			return
+		}
+		data, err := json.Marshal(&tasks)
+		if err != nil {
+			fmt.Printf("error: %v\n", err)
+			return
+		}
+		_ = ioutil.WriteFile(args[1], data, 0644)
 	case "restore-cron":
 		restore, err := ioutil.ReadFile(args[1])
 		if err != nil {
@@ -136,5 +162,5 @@ func main() {
 
 	c.Start()
 
-	plugin.Start(new(GronPlugin))
+	plugin.Start(&CrontabPlugin{})
 }

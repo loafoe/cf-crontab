@@ -10,6 +10,10 @@ type Task struct {
 	Job Job `json:"job"`
 }
 
+func (t Task)String() string {
+	return fmt.Sprintf("%s %v %v %v", t.Schedule, t.Job.Type, t.Job.Params["method"], t.Job.Params["url"])
+}
+
 func (t Task)Add(cr *cron.Cron) error {
 	var command Command
 	switch  t.Job.Type {
@@ -30,5 +34,7 @@ func (t Task)Add(cr *cron.Cron) error {
 	default:
 		return fmt.Errorf("unsupported type: %s", t.Job.Type)
 	}
-	return cr.AddFunc(t.Schedule, command.Run)
+	entryID, err := cr.AddFunc(t.Schedule, command.Run)
+	fmt.Printf("Added: %v\n", entryID)
+	return err
 }
