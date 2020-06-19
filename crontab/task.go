@@ -8,14 +8,15 @@ import (
 type Task struct {
 	Schedule string `json:"schedule"`
 	Job Job `json:"job"`
+	EntryID cron.EntryID `json:"-"`
 }
 
-func (t Task)String() string {
-	return fmt.Sprintf("%s %v %v %v", t.Schedule, t.Job.Type, t.Job.Params["method"], t.Job.Params["url"])
+func (t *Task)String() string {
+	return fmt.Sprintf("%d: %s %v %v %v", t.EntryID, t.Schedule, t.Job.Type, t.Job.Params["method"], t.Job.Params["url"])
 }
 
-func (t Task)Add(cr *cron.Cron) error {
-	var command Command
+func (t *Task)Add(cr *cron.Cron) error {
+	var command cron.Job
 	switch  t.Job.Type {
 	case "http":
 		command = Http{
@@ -35,6 +36,6 @@ func (t Task)Add(cr *cron.Cron) error {
 		return fmt.Errorf("unsupported type: %s", t.Job.Type)
 	}
 	entryID, err := cr.AddFunc(t.Schedule, command.Run)
-	fmt.Printf("Added: %v\n", entryID)
+	t.EntryID = entryID
 	return err
 }

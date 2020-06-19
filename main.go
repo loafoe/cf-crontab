@@ -9,9 +9,13 @@ import (
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
+	"strconv"
 )
 
-type CrontabPlugin struct {}
+type CrontabPlugin struct {
+	cr *cron.Cron
+	tasks *[]crontab.Task
+}
 
 func (c *CrontabPlugin) GetMetadata() plugin.PluginMetadata {
 	return plugin.PluginMetadata{
@@ -80,13 +84,8 @@ func (c *CrontabPlugin) GetMetadata() plugin.PluginMetadata {
 func (c *CrontabPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	switch args[0] {
 	case "list-cron":
-		tasks, err := config.LoadFromEnv()
-		if err != nil {
-			fmt.Printf("error: %v\n", err)
-			return
-		}
-		for i, task := range tasks {
-			fmt.Printf("%d: %v\n", i, task)
+		for _, task := range *c.tasks {
+			fmt.Printf("%v\n", task.String())
 		}
 	case "add-cron":
 		if len(args) < 2 {
@@ -108,14 +107,20 @@ func (c *CrontabPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Printf("%d: %v\n", i, task)
 		}
 	case "remove-cron":
-		fmt.Println("TODO")
-	case "backup-cron":
-		tasks, err := config.LoadFromEnv()
+		index, err := strconv.Atoi(args[1])
 		if err != nil {
 			fmt.Printf("error: %v\n", err)
 			return
 		}
-		data, err := json.Marshal(&tasks)
+		for i, t := range *c.tasks {
+			if int(t.EntryID) == index {
+				fmt.Printf("Removing %d\n", index)
+				*c.tasks = append((*c.tasks)[:i], (*c.tasks)[i+1:]...)
+				(*c.cr).Remove(cron.EntryID(index))
+			}
+		}
+	case "backup-cron":
+		data, err := json.Marshal(c.tasks)
 		if err != nil {
 			fmt.Printf("error: %v\n", err)
 			return
@@ -156,11 +161,14 @@ func main() {
 		fmt.Printf("error loading config: %v\n", err)
 		return
 	}
-	for _, task := range tasks {
-		task.Add(c)
+	for i, _ := range tasks {
+		_ = tasks[i].Add(c)
 	}
 
 	c.Start()
 
-	plugin.Start(&CrontabPlugin{})
+	plugin.Start(&CrontabPlugin{
+		cr: c,
+		tasks: &tasks,
+	})
 }
