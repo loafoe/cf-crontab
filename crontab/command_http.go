@@ -6,10 +6,10 @@ import (
 )
 
 type Http struct {
-	Method string
-	URL string
-	Headers http.Header
-	Body string
+	Method  string            `json:"method"`
+	URL     string            `json:"url"`
+	Headers map[string]string `json:"headers"`
+	Body    string            `json:"body"`
 }
 
 func (h Http) Run() {
@@ -17,7 +17,9 @@ func (h Http) Run() {
 	if err != nil {
 		return
 	}
-	req.Header = h.Headers
+	for h, v := range h.Headers {
+		req.Header.Set(h, v)
+	}
 	client := http.DefaultClient
 	_, _ = client.Do(req)
 }
