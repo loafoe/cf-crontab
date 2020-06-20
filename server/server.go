@@ -11,9 +11,9 @@ import (
 	"strconv"
 )
 
-// authCheck verifies basic auth. Username hardcoded to `redshift`
+// authCheck verifies basic auth
 func authCheck(username, password string, c echo.Context) (bool, error) {
-	if subtle.ConstantTimeCompare([]byte(username), []byte("redshift")) == 1 &&
+	if subtle.ConstantTimeCompare([]byte(username), []byte(username)) == 1 &&
 		subtle.ConstantTimeCompare([]byte(password), []byte(password)) == 1 {
 		return true, nil
 	}
@@ -43,7 +43,7 @@ func entriesGetHandler(state *crontab.State) echo.HandlerFunc {
 
 func entriesPostHandler(state *crontab.State) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		newEntries := []crontab.Task{}
+		var newEntries []crontab.Task
 		if err := c.Bind(&newEntries); err != nil {
 			return err
 		}
