@@ -105,7 +105,7 @@ func Start() {
 
 	// Cron
 	table := &State {
-		cronTab: cron.New(),
+		cronTab: cron.New(cron.WithSeconds()),
 		list: make([]*crontab.Task, 0),
 	}
 	entries, err := crontab.LoadFromEnv()
