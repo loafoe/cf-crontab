@@ -1,6 +1,8 @@
 package crontab
 
 import (
+	"fmt"
+
 	"bytes"
 	"net/http"
 )
@@ -10,6 +12,7 @@ type Http struct {
 	URL     string            `json:"url"`
 	Headers map[string]string `json:"headers"`
 	Body    string            `json:"body"`
+	Task    *Task             `json:"-"`
 }
 
 func (h Http) Run() {
@@ -21,5 +24,12 @@ func (h Http) Run() {
 		req.Header.Set(h, v)
 	}
 	client := http.DefaultClient
-	_, _ = client.Do(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("%d: %v\n", h.Task.EntryID, err)
+		return
+	}
+	if resp != nil {
+		fmt.Printf("%d: HTTP %d\n", h.Task.EntryID, resp.StatusCode)
+	}
 }

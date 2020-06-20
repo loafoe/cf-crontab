@@ -7,15 +7,12 @@ import (
 	"strconv"
 
 	"code.cloudfoundry.org/cli/plugin"
-	"github.com/philips-labs/cf-crontab/config"
 	"github.com/philips-labs/cf-crontab/crontab"
-	"github.com/robfig/cron/v3"
 )
 
 // Crontab implements the CF plugin interface
 type Crontab struct {
-	Cron  *cron.Cron
-	Tasks *[]crontab.Task
+	Entries *[]crontab.Task
 }
 
 func (c *Crontab) GetMetadata() plugin.PluginMetadata {
@@ -82,15 +79,22 @@ func (c *Crontab) GetMetadata() plugin.PluginMetadata {
 	}
 }
 
+func (c *Crontab) CrontabEntries() []crontab.Task {
+	if c.Entries == nil {
+		return []crontab.Task{}
+	}
+	return *c.Entries
+}
+
 func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 	switch args[0] {
 	case "list-cron":
-		for _, task := range *c.Tasks {
+		for _, task := range c.CrontabEntries() {
 			fmt.Printf("%v\n", task.String())
 		}
 	case "add-cron":
 		if len(args) < 2 {
-			fmt.Printf("need json file with Tasks\n")
+			fmt.Printf("need json file with Entries\n")
 			return
 		}
 		data, err := ioutil.ReadFile(args[1])
@@ -113,15 +117,17 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Printf("error: %v\n", err)
 			return
 		}
-		for i, t := range *c.Tasks {
+
+		for i, t := range c.CrontabEntries() {
 			if int(t.EntryID) == index {
 				fmt.Printf("Removing %d\n", index)
-				*c.Tasks = append((*c.Tasks)[:i], (*c.Tasks)[i+1:]...)
-				(*c.Cron).Remove(cron.EntryID(index))
+				*c.Entries = append((*c.Entries)[:i], (*c.Entries)[i+1:]...)
+				// TODO: remove on server
+				// Local: (*c.Cron).Remove(cron.EntryID(index))
 			}
 		}
 	case "backup-cron":
-		data, err := json.Marshal(c.Tasks)
+		data, err := json.Marshal(c.Entries)
 		if err != nil {
 			fmt.Printf("error: %v\n", err)
 			return
@@ -139,7 +145,7 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Printf("error: %v\n", err)
 			return
 		}
-		parts, err := config.EnvParts(tasks)
+		parts, err := crontab.EnvParts(tasks)
 		if err != nil {
 			fmt.Printf("error: %v\n", err)
 			return

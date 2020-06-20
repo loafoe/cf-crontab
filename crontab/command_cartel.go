@@ -5,7 +5,6 @@ import (
 )
 
 type Cartel struct {
-
 }
 
 func (c Cartel) Run() {

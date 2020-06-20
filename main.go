@@ -1,30 +1,26 @@
 package main
 
 import (
-	"fmt"
+	"os"
+
 	"github.com/philips-labs/cf-crontab/plugin"
+	"github.com/philips-labs/cf-crontab/server"
 
 	cfplugin "code.cloudfoundry.org/cli/plugin"
-	"github.com/philips-labs/cf-crontab/config"
-	"github.com/robfig/cron/v3"
 )
 
 func main() {
-	c := cron.New()
-
-	tasks, err := config.LoadFromEnv()
-	if err != nil {
-		fmt.Printf("error loading config: %v\n", err)
+	if len(os.Args) == 2 && os.Args[1] == "server" {
+		serverMode()
 		return
 	}
-	for i, _ := range tasks {
-		_ = tasks[i].Add(c)
-	}
+	pluginMode()
+}
 
-	c.Start()
+func pluginMode() {
+	cfplugin.Start(&plugin.Crontab{})
+}
 
-	cfplugin.Start(&plugin.Crontab{
-		Cron:    c,
-		Tasks: &tasks,
-	})
+func serverMode() {
+	server.Start()
 }

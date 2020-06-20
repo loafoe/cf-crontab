@@ -1,33 +1,32 @@
-package config
+package crontab
 
 import (
-	"github.com/philips-labs/cf-crontab/crontab"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 )
 
 func TestEnvPartsAndLoad(t *testing.T) {
-	task := crontab.Task{
+	task := Task{
 		Schedule: "* * * * *",
-		Job: crontab.Job{
+		Job: Job{
 			Type: "http",
-			Params: map[string]string {
+			Params: map[string]string{
 				"method": "POST",
-				"foo": "BAR",
+				"foo":    "BAR",
 			},
 		},
 	}
-	tasks := make([]crontab.Task, 0)
-	for i :=0; i < 100; i++ {
-		tasks = append(tasks, task)
+	entries := make([]Task, 0)
+	for i := 0; i < 100; i++ {
+		entries = append(entries, task)
 	}
 
-	parts, err := EnvParts(tasks)
+	parts, err := EnvParts(entries)
 	if !assert.Nil(t, err) {
 		return
 	}
-	if !assert.Equal(t, 3,len(parts)) {
+	if !assert.Equal(t, 3, len(parts)) {
 		return
 	}
 	keys := make([]string, 0)

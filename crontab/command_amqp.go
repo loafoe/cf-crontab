@@ -6,11 +6,11 @@ import (
 )
 
 type Amqp struct {
-	Exchange string `json:"exchange"`
+	Exchange     string `json:"exchange"`
 	ExchangeType string `json:"exchange_type"`
-	RoutingKey string `json:"routing_key"`
-	Payload string `json:"payload"`
-	ContentType string `json:"content_type"`
+	RoutingKey   string `json:"routing_key"`
+	Payload      string `json:"payload"`
+	ContentType  string `json:"content_type"`
 }
 
 func (a Amqp) Run() {
@@ -24,6 +24,6 @@ func (a Amqp) Run() {
 	}
 	_ = producer.Publish(a.Exchange, a.RoutingKey, amqp.Publishing{
 		ContentType: a.ContentType,
-		Body: []byte(a.Payload),
+		Body:        []byte(a.Payload),
 	})
 }

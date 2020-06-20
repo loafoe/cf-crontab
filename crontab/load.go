@@ -1,20 +1,19 @@
-package config
+package crontab
 
 import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/philips-labs/cf-crontab/crontab"
 	"os"
 )
 
 const (
 	maxPartSize = 4096
-	configTag = "CRONTAB_CONFIG"
+	configTag   = "CRONTAB_CONFIG"
 )
 
-func LoadFromEnv() ([]crontab.Task, error) {
-	tasks := make([]crontab.Task, 0)
+func LoadFromEnv() ([]Task, error) {
+	entries := make([]Task, 0)
 
 	parts := make(chan string)
 	go func(p chan string) {
@@ -35,20 +34,20 @@ func LoadFromEnv() ([]crontab.Task, error) {
 		base64FullConfig = base64FullConfig + p
 	}
 	if base64FullConfig == "" {
-		return tasks, nil
+		return entries, nil
 	}
 	decoded, err := base64.StdEncoding.DecodeString(base64FullConfig)
 	if err != nil {
-		return tasks, err
+		return entries, err
 	}
-	err = json.Unmarshal(decoded, &tasks)
+	err = json.Unmarshal(decoded, &entries)
 	if err != nil {
-		return tasks, err
+		return entries, err
 	}
-	return tasks, nil
+	return entries, nil
 }
 
-func EnvParts(tasks []crontab.Task) (map[string]string, error){
+func EnvParts(tasks []Task) (map[string]string, error) {
 	parts := make(map[string]string)
 	data, err := json.Marshal(&tasks)
 	if err != nil {
@@ -57,16 +56,16 @@ func EnvParts(tasks []crontab.Task) (map[string]string, error){
 	encoded := base64.StdEncoding.EncodeToString(data)
 	part := 0
 	l := len(encoded)
-	for c :=0; c < l; c++ {
-		if c > 0 && c % maxPartSize == 0 {
+	for c := 0; c < l; c++ {
+		if c > 0 && c%maxPartSize == 0 {
 			partName := fmt.Sprintf("%s_%d", configTag, part)
 			part++
-			parts[partName] = encoded[c-maxPartSize:c]
+			parts[partName] = encoded[c-maxPartSize : c]
 		}
 	}
 	if r := l % maxPartSize; r > 0 {
 		partName := fmt.Sprintf("%s_%d", configTag, part)
-		parts[partName] = encoded[l-r:l]
+		parts[partName] = encoded[l-r : l]
 	}
 	return parts, nil
 }
