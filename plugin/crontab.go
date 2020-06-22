@@ -89,9 +89,23 @@ func (c *Crontab) CrontabEntries() []crontab.Task {
 func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 	switch args[0] {
 	case "crontab":
-		for _, task := range c.CrontabEntries() {
-			fmt.Printf("%v\n", task.String())
+		server, err := CrontabServerResolver(cliConnection)
+		if err != nil {
+			fmt.Printf("error resolving server: %v\n", err)
+			return
 		}
+		host, err := server.Host()
+		if err != nil {
+			fmt.Printf("error resolving host: %v\n", err)
+			return
+		}
+		fmt.Printf("Host: %v\n", host)
+		entries, err := server.GetSecret()
+		if err != nil {
+			fmt.Printf("error resolving host: %v\n", err)
+			return
+		}
+		fmt.Printf("entries: %v\n", entries)
 	case "add-cron":
 		if len(args) < 2 {
 			fmt.Printf("need json file with Entries\n")
