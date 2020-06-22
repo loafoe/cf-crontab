@@ -1,9 +1,9 @@
 package server
 
 import (
-	"crypto/subtle"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/philips-labs/cf-crontab/crontab"
 	"github.com/spf13/viper"
 	"net/http"
@@ -11,25 +11,26 @@ import (
 	"strconv"
 )
 
-// authCheck verifies basic auth
-func authCheck(username, password string, c echo.Context) (bool, error) {
-	if subtle.ConstantTimeCompare([]byte(username), []byte(username)) == 1 &&
-		subtle.ConstantTimeCompare([]byte(password), []byte(password)) == 1 {
-		return true, nil
-	}
-	return false, nil
+type errResponse struct {
+	Message string `json:"message"`
+	Code int `json:"code"`
 }
-
 func entriesDeleteHandler(state *crontab.State) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		stringID := c.Param("entryID")
 		entryID, err := strconv.Atoi(stringID)
 		if err != nil {
-			return err
+			return c.JSON(http.StatusBadRequest, errResponse{
+				Message: "invalid entry",
+				Code: http.StatusBadRequest,
+			})
 		}
 		err = state.DeleteEntry(entryID)
 		if err != nil {
-			return err
+			return c.JSON(http.StatusBadRequest, errResponse{
+				Message: err.Error(),
+				Code: http.StatusBadRequest,
+			})
 		}
 		return c.String(http.StatusNoContent, "")
 	}
@@ -57,7 +58,8 @@ func Start() {
 	// Config
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")
-	viper.SetEnvPrefix("cf-crontab")
+	viper.SetEnvPrefix("cf_crontab")
+	viper.SetDefault("secret", "")
 	viper.AutomaticEnv()
 	viper.AddConfigPath(".")
 	_ = viper.ReadInConfig()
@@ -74,7 +76,14 @@ func Start() {
 	state.StartCron()
 
 	// Echo
+	secret := viper.GetString("secret")
+	if secret == "" {
+		fmt.Printf("secret is required\n")
+		return
+	}
 	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(HSDPValidator("crontab", secret))
 	e.GET("/entries", entriesGetHandler(state))
 	e.POST("/entries", entriesPostHandler(state))
 	e.DELETE("/entries/:entryID", entriesDeleteHandler(state))

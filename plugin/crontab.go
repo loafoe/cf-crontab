@@ -30,10 +30,10 @@ func (c *Crontab) GetMetadata() plugin.PluginMetadata {
 		Name: "cf-crontab",
 		Commands: []plugin.Command{
 			{
-				Name:     "list-cron",
-				HelpText: "List all tabs",
+				Name:     "crontab",
+				HelpText: "List all crontab entries",
 				UsageDetails: plugin.Usage{
-					Usage: "cf list-cron",
+					Usage: "cf crontab",
 				},
 			},
 			{
@@ -67,7 +67,7 @@ func (c *Crontab) GetMetadata() plugin.PluginMetadata {
 			},
 			{
 				Name:     "restore-cron",
-				HelpText: "Resotre cron table",
+				HelpText: "Restore cron table",
 				UsageDetails: plugin.Usage{
 					Usage: "cf restore-cron",
 					Options: map[string]string{
@@ -88,7 +88,7 @@ func (c *Crontab) CrontabEntries() []crontab.Task {
 
 func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 	switch args[0] {
-	case "list-cron":
+	case "crontab":
 		for _, task := range c.CrontabEntries() {
 			fmt.Printf("%v\n", task.String())
 		}

@@ -9,6 +9,8 @@ import (
 	cfplugin "code.cloudfoundry.org/cli/plugin"
 )
 
+var GitCommit = "deadbeaf"
+
 func main() {
 
 	if len(os.Args) == 2 && os.Args[1] == "server" {
