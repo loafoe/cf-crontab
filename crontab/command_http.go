@@ -3,7 +3,6 @@ package crontab
 import (
 	"fmt"
 
-	"bytes"
 	"net/http"
 )
 
@@ -16,7 +15,7 @@ type Http struct {
 }
 
 func (h Http) Run() {
-	req, err := http.NewRequest(h.Method, h.URL, bytes.NewBufferString(h.Body))
+	req, err := http.NewRequest(h.Method, h.URL, nil)
 	if err != nil {
 		return
 	}
@@ -30,6 +29,7 @@ func (h Http) Run() {
 		return
 	}
 	if resp != nil {
+		defer resp.Body.Close()
 		fmt.Printf("%d: HTTP %d\n", h.Task.EntryID, resp.StatusCode)
 	}
 }
