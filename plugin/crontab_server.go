@@ -9,6 +9,7 @@ import (
 	"github.com/philips-labs/cf-crontab/crontab"
 	signer "github.com/philips-software/go-hsdp-signer"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -37,6 +38,9 @@ func (c CrontabServer) ServerRequest(method, endpoint string, body io.Reader) (*
 		return nil, err
 	}
 	req, err := http.NewRequestWithContext(context.Background(), method, endpoint, body)
+	if err != nil {
+		return nil, err
+	}
 	req.URL = u
 	req.Host = u.Host
 	req.Proto = "HTTP/1.1"
@@ -97,8 +101,13 @@ func (c CrontabServer) GetEntries() ([]*crontab.Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("%v\n", resp)
-	return nil, errMissingOrInvalidToken
+	var entries []*crontab.Task
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(data, &entries)
+	return entries, err
 }
 
 func CrontabServerResolver(cliConnection plugin.CliConnection) (*CrontabServer, error) {

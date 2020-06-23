@@ -17,7 +17,8 @@ func HSDPValidator(key, secret string) echo.MiddlewareFunc {
 	}
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			valid, err := s.ValidateRequest(c.Request())
+			req := c.Request()
+			valid, err := s.ValidateRequest(req)
 			if err != nil {
 				return &echo.HTTPError{
 					Code:     http.StatusUnauthorized,
