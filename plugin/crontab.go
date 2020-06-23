@@ -100,7 +100,7 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 			return
 		}
 		fmt.Printf("Host: %v\n", host)
-		entries, err := server.GetSecret()
+		entries, err := server.GetEntries()
 		if err != nil {
 			fmt.Printf("error resolving host: %v\n", err)
 			return

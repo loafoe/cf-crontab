@@ -83,7 +83,7 @@ func Start() {
 	}
 	e := echo.New()
 	e.Use(middleware.Logger())
-	e.Use(HSDPValidator("crontab", secret))
+	e.Use(HSDPValidator(crontab.SharedKey, secret))
 	e.GET("/entries", entriesGetHandler(state))
 	e.POST("/entries", entriesPostHandler(state))
 	e.DELETE("/entries/:entryID", entriesDeleteHandler(state))

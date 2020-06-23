@@ -8,7 +8,7 @@ import (
 
 func TestEnvPartsAndLoad(t *testing.T) {
 	task := Task{
-		Schedule: "* * * * *",
+		Schedule: "0 * * * * *",
 		Job: Job{
 			Type: "http",
 			Params: map[string]string{
