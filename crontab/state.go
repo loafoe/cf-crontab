@@ -23,7 +23,7 @@ func (e *State)StartCron() {
 func (e *State)AddEntries(newEntries []Task) {
 	e.mux.Lock()
 	defer e.mux.Unlock()
-	for i, _ := range newEntries {
+	for i := range newEntries {
 		_ = newEntries[i].Add(e.cronTab)
 		e.list = append(e.list, &newEntries[i])
 	}

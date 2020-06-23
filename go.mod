@@ -7,9 +7,12 @@ require (
 	github.com/cloudfoundry-community/gautocloud v1.1.5 // indirect
 	github.com/cloudfoundry-community/go-cfenv v1.18.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/go-openapi/strfmt v0.19.5 // indirect
 	github.com/golang/mock v1.4.3 // indirect
+	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/labstack/echo/v4 v4.1.16
 	github.com/loafoe/go-rabbitmq v0.4.0
+	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
 	github.com/pelletier/go-toml v1.8.0 // indirect
 	github.com/philips-software/go-hsdp-signer v1.3.0

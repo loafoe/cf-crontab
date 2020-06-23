@@ -3,11 +3,14 @@ package plugin
 import (
 	"encoding/json"
 	"fmt"
+	_ "github.com/jedib0t/go-pretty/text"
 	"io/ioutil"
+	"os"
 	"strconv"
 
 	"code.cloudfoundry.org/cli/plugin"
 	"github.com/philips-labs/cf-crontab/crontab"
+	"github.com/jedib0t/go-pretty/table"
 )
 
 // Crontab implements the CF plugin interface
@@ -89,6 +92,7 @@ func (c *Crontab) CrontabEntries() []crontab.Task {
 func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 	switch args[0] {
 	case "crontab":
+		fmt.Printf("Discovering crontab server ...\n")
 		server, err := CrontabServerResolver(cliConnection)
 		if err != nil {
 			fmt.Printf("error resolving server: %v\n", err)
@@ -99,13 +103,29 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Printf("error resolving host: %v\n", err)
 			return
 		}
-		fmt.Printf("Host: %v\n", host)
+		fmt.Printf("Getting crontab from %s ...\n", host)
 		entries, err := server.GetEntries()
 		if err != nil {
 			fmt.Printf("error resolving host: %v\n", err)
 			return
 		}
-		fmt.Printf("entries: %v\n", entries)
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.SetStyle(table.StyleLight)
+		t.AppendHeader(table.Row{"#", "schedule", "type", "details"})
+		for _, e := range entries {
+			details := ""
+			switch e.Job.Type {
+			case "http":
+				details = fmt.Sprintf("%s %s", e.Job.Params["method"], e.Job.Params["url"])
+			case "ampq":
+			case "cartel":
+			default:
+				details = ""
+			}
+			t.AppendRow([]interface{}{e.EntryID, e.Schedule, e.Job.Type, details})
+		}
+		t.Render()
 	case "add-cron":
 		if len(args) < 2 {
 			fmt.Printf("need json file with Entries\n")
