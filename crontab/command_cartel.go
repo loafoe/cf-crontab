@@ -6,7 +6,7 @@ import (
 
 type Cartel struct {
 	Command string
-	Tags strings
+	Tags string
 	Instance string
 	Action string
 }
