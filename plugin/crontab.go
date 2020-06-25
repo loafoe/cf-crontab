@@ -146,20 +146,37 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Printf("%d: %v\n", i, task)
 		}
 	case "remove-cron":
+		if len(args) < 2 {
+			fmt.Printf("need entryID\n")
+			return
+		}
 		index, err := strconv.Atoi(args[1])
 		if err != nil {
 			fmt.Printf("error: %v\n", err)
 			return
 		}
-
-		for i, t := range c.CrontabEntries() {
-			if int(t.EntryID) == index {
-				fmt.Printf("Removing %d\n", index)
-				*c.Entries = append((*c.Entries)[:i], (*c.Entries)[i+1:]...)
-				// TODO: remove on server
-				// Local: (*c.Cron).Remove(cron.EntryID(index))
-			}
+		fmt.Printf("Discovering crontab server ...\n")
+		server, err := CrontabServerResolver(cliConnection)
+		if err != nil {
+			fmt.Printf("error resolving server: %v\n", err)
+			return
 		}
+		host, err := server.Host()
+		if err != nil {
+			fmt.Printf("error resolving host: %v\n", err)
+			return
+		}
+		fmt.Printf("Deleting entry %d from %s ...\n", index, host)
+		ok, err := server.DeleteEntry(index)
+		if err != nil {
+			fmt.Printf("error deleting: %v\n", err)
+			return
+		}
+		if !ok {
+			fmt.Printf("FAILED\n")
+			return
+		}
+		fmt.Printf("OK\n")
 	case "backup-cron":
 		data, err := json.Marshal(c.Entries)
 		if err != nil {

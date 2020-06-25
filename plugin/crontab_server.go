@@ -5,8 +5,10 @@ import (
 	plugin_models "code.cloudfoundry.org/cli/plugin/models"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/philips-labs/cf-crontab/crontab"
+	"github.com/philips-labs/cf-crontab/server"
 	signer "github.com/philips-software/go-hsdp-signer"
 	"io"
 	"io/ioutil"
@@ -108,6 +110,29 @@ func (c CrontabServer) GetEntries() ([]*crontab.Task, error) {
 	}
 	err = json.Unmarshal(data, &entries)
 	return entries, err
+}
+
+func (c CrontabServer) DeleteEntry(index int) (bool, error) {
+	resp, err := c.ServerRequest("DELETE", fmt.Sprintf("/entries/%d", index), nil)
+	if err != nil {
+		return false, err
+	}
+	if resp == nil {
+		return false, errUnexpectedResponse
+	}
+	if resp.StatusCode == http.StatusNoContent {
+		return true, nil
+	}
+	var errResponse server.ErrResponse
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+	err = json.Unmarshal(data, &errResponse)
+	if err != nil {
+		return false, err
+	}
+	return false, errors.New(errResponse.Message)
 }
 
 func CrontabServerResolver(cliConnection plugin.CliConnection) (*CrontabServer, error) {

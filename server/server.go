@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-type errResponse struct {
+type ErrResponse struct {
 	Message string `json:"message"`
 	Code int `json:"code"`
 }
@@ -20,14 +20,14 @@ func entriesDeleteHandler(state *crontab.State) echo.HandlerFunc {
 		stringID := c.Param("entryID")
 		entryID, err := strconv.Atoi(stringID)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, errResponse{
+			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Message: "invalid entry",
 				Code: http.StatusBadRequest,
 			})
 		}
 		err = state.DeleteEntry(entryID)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, errResponse{
+			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Message: err.Error(),
 				Code: http.StatusBadRequest,
 			})

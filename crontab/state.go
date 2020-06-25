@@ -41,7 +41,7 @@ func (e *State) DeleteEntry(id int) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("entry not found: %d", id)
+	return fmt.Errorf("entry not found")
 }
 
 func NewState() *State {
