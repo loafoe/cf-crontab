@@ -1,0 +1,12 @@
+applications:
+- name: cf-crontab
+  disk_quota: 1G
+  docker:
+    image: loafoe/cf-crontab:0.0.1
+  env:
+    CF_CRONTAB_SECRET: verysecret
+  instances: 1
+  memory: 64M
+  routes:
+  - route: cf-crontab.cloud.pcftest.com
+  stack: cflinuxfs3
