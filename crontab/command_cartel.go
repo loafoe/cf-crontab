@@ -5,6 +5,10 @@ import (
 )
 
 type Cartel struct {
+	Command string
+	Tags strings
+	Instance string
+	Action string
 }
 
 func (c Cartel) Run() {
