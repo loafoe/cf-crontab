@@ -4,7 +4,7 @@ Uses bound services for credentials retrieval.
 
 The binary also doubles as a CF CLI plugin and exposes commands to manage your crontab (add, delete, backup)
 
-Finally, it (ab)uses its ENVironment variable space to persist your crontab so you don't even need a backing store, we are going for cheap! Your crontab will thus survive restarts, crashes and Cloud foundry updates.
+Finally, it uses the server components environment to persist your crontab so you don't even need a backing store, we are going for cheap! Your crontab will thus survive restarts, crashes and Cloud foundry updates.
 
 # requirements
 1. A clever password to protect the crontab:
