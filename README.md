@@ -28,7 +28,7 @@ applications:
 - name: cf-crontab
   disk_quota: 128M
   docker:
-    image: loafoe/cf-crontab:0.0.1
+    image: loafoe/cf-crontab:0.0.2
   env:
     CF_CRONTAB_SECRET: PASSWORD_HERE
   instances: 1
