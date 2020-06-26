@@ -1,20 +1,26 @@
 package crontab
 
 import (
+	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 )
 
 func TestEnvPartsAndLoad(t *testing.T) {
+	var cmd = Http{
+		Method: "POST",
+		URL: "https://foo.com",
+	}
+	raw, err := json.Marshal(&cmd)
+	if !assert.Nil(t, err) {
+		return
+	}
 	task := Task{
 		Schedule: "0 * * * * *",
 		Job: Job{
 			Type: "http",
-			Params: map[string]string{
-				"method": "POST",
-				"foo":    "BAR",
-			},
+			Command: raw,
 		},
 	}
 	entries := make([]*Task, 0)
@@ -26,7 +32,7 @@ func TestEnvPartsAndLoad(t *testing.T) {
 	if !assert.Nil(t, err) {
 		return
 	}
-	if !assert.Equal(t, 2, len(parts)) {
+	if !assert.Equal(t, 3, len(parts)) {
 		return
 	}
 	keys := make([]string, 0)

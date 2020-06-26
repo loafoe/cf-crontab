@@ -1,7 +1,9 @@
 package crontab
 
+import "encoding/json"
+
 // Job describes a job
 type Job struct {
 	Type   string            `json:"type"`
-	Params map[string]string `json:"params"`
+	Command json.RawMessage `json:"command,omitempty"`
 }

@@ -110,15 +110,7 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 		t.SetStyle(table.StyleLight)
 		t.AppendHeader(table.Row{"#", "schedule", "type", "details"})
 		for _, e := range entries {
-			details := ""
-			switch e.Job.Type {
-			case "http":
-				details = fmt.Sprintf("%s %s", e.Job.Params["method"], e.Job.Params["url"])
-			case "ampq":
-			case "cartel":
-			default:
-				details = ""
-			}
+			details := fmt.Sprintf("%v", e.Job)
 			t.AppendRow([]interface{}{e.EntryID, e.Schedule, e.Job.Type, details})
 		}
 		t.Render()
