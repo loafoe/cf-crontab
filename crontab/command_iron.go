@@ -11,15 +11,15 @@ type Iron struct {
 	Command  string `json:"command"`
 	CodeName string `json:"code_name"`
 	Cluster  string `json:"cluster"`
-	Timeout  int `json:"timeout"`
+	Timeout  int    `json:"timeout"`
 	Payload  string `json:"payload"`
-	Task    *Task             `json:"-"`
+	Task     *Task  `json:"-"`
 }
 
 func (i Iron) Run() {
 	var client *hsdp.IronClient
 	err := gautocloud.Inject(&client)
-	if err !=nil {
+	if err != nil {
 		fmt.Printf("no iron service found. please bind one to cf-crontab\n")
 		return
 	}
@@ -27,9 +27,9 @@ func (i Iron) Run() {
 	case "queue":
 		task, _, err := client.Tasks.QueueTask(iron.Task{
 			CodeName: i.CodeName,
-			Cluster: i.Cluster,
-			Payload: i.Payload,
-			Timeout: i.Timeout,
+			Cluster:  i.Cluster,
+			Payload:  i.Payload,
+			Timeout:  i.Timeout,
 		})
 		if err != nil {
 			fmt.Printf("error queuing iron command `%v`: %v\n", i.Command, err)

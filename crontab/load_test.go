@@ -10,7 +10,7 @@ import (
 func TestEnvPartsAndLoad(t *testing.T) {
 	var cmd = Http{
 		Method: "POST",
-		URL: "https://foo.com",
+		URL:    "https://foo.com",
 	}
 	raw, err := json.Marshal(&cmd)
 	if !assert.Nil(t, err) {
@@ -19,7 +19,7 @@ func TestEnvPartsAndLoad(t *testing.T) {
 	task := Task{
 		Schedule: "0 * * * * *",
 		Job: Job{
-			Type: "http",
+			Type:    "http",
 			Command: raw,
 		},
 	}
@@ -40,7 +40,7 @@ func TestEnvPartsAndLoad(t *testing.T) {
 		keys = append(keys, k)
 		_ = os.Setenv(k, v)
 	}
-	assert.Equal(t,  configTag+"_0", keys[0])
+	assert.Equal(t, configTag+"_0", keys[0])
 	loadedParts, err := LoadFromEnv()
 	if !assert.Nil(t, err) {
 		return

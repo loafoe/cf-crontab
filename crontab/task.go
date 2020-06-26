@@ -25,6 +25,7 @@ func (t *Task) Add(cr *cron.Cron) error {
 		if err != nil {
 			return err
 		}
+		command.Task = t
 		job = command
 	case "amqp":
 		var command Amqp
@@ -32,6 +33,7 @@ func (t *Task) Add(cr *cron.Cron) error {
 		if err != nil {
 			return err
 		}
+		command.Task = t
 		job = command
 	default:
 		return fmt.Errorf("unsupported type: %s", t.Job.Type)

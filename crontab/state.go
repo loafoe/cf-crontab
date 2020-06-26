@@ -7,26 +7,31 @@ import (
 )
 
 type State struct {
-	list []*Task
+	list    []*Task
 	cronTab *cron.Cron
-	mux sync.Mutex
+	mux     sync.Mutex
 }
 
-func (e *State)Entries() []*Task {
+func (e *State) Entries() []*Task {
 	return e.list
 }
 
-func (e *State)StartCron() {
+func (e *State) StartCron() {
 	e.cronTab.Start()
 }
 
-func (e *State)AddEntries(newEntries []Task) {
+func (e *State) AddEntries(newEntries []Task) (*[]Task, error) {
 	e.mux.Lock()
 	defer e.mux.Unlock()
 	for i := range newEntries {
-		_ = newEntries[i].Add(e.cronTab)
+		err := newEntries[i].Add(e.cronTab)
+		if err != nil {
+			return nil, err
+		}
+
 		e.list = append(e.list, &newEntries[i])
 	}
+	return &newEntries, nil
 }
 
 func (e *State) DeleteEntry(id int) error {
@@ -47,7 +52,7 @@ func (e *State) DeleteEntry(id int) error {
 func NewState() *State {
 	state := &State{
 		cronTab: cron.New(cron.WithSeconds()),
-		list: make([]*Task, 0),
+		list:    make([]*Task, 0),
 	}
 	return state
 }
