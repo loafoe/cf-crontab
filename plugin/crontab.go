@@ -3,10 +3,11 @@ package plugin
 import (
 	"encoding/json"
 	"fmt"
-	_ "github.com/jedib0t/go-pretty/text"
 	"io/ioutil"
 	"os"
 	"strconv"
+
+	_ "github.com/jedib0t/go-pretty/text"
 
 	"code.cloudfoundry.org/cli/plugin"
 	"github.com/jedib0t/go-pretty/table"
@@ -122,7 +123,11 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Printf("error: %v\n", err)
 			return
 		}
-		fmt.Printf("Discovering crontab server ...\n")
+		if len(tasks) == 0 {
+			fmt.Printf("no tasks found. check your .json\n")
+			return
+		}
+		fmt.Printf("Adding %d entries ...\n", len(tasks))
 		server, err := CrontabServerResolver(cliConnection)
 		if err != nil {
 			fmt.Printf("error resolving server: %v\n", err)

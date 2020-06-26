@@ -1,20 +1,22 @@
 package plugin
 
 import (
-	"code.cloudfoundry.org/cli/plugin"
-	plugin_models "code.cloudfoundry.org/cli/plugin/models"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/philips-labs/cf-crontab/crontab"
-	"github.com/philips-labs/cf-crontab/server"
-	signer "github.com/philips-software/go-hsdp-signer"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"code.cloudfoundry.org/cli/plugin"
+	plugin_models "code.cloudfoundry.org/cli/plugin/models"
+	"github.com/philips-labs/cf-crontab/crontab"
+	"github.com/philips-labs/cf-crontab/server"
+	signer "github.com/philips-software/go-hsdp-signer"
 )
 
 type CrontabServer struct {
@@ -154,14 +156,19 @@ func (c CrontabServer) DeleteEntry(index int) (bool, error) {
 }
 
 func (c CrontabServer) AddEntries(tasks []crontab.Task) ([]*crontab.Task, error) {
-	resp, err := c.ServerRequest("POST", "/entries", nil)
+	data, err := json.Marshal(tasks)
+	if err != nil {
+		return nil, err
+	}
+	body := bytes.NewReader(data)
+	resp, err := c.ServerRequest("POST", "/entries", body)
 	if err != nil {
 		return nil, err
 	}
 	if resp == nil || resp.StatusCode != http.StatusOK {
 		return nil, errUnexpectedResponse
 	}
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
