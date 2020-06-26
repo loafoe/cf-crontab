@@ -53,7 +53,7 @@ func (c *Crontab) GetMetadata() plugin.PluginMetadata {
 			},
 			{
 				Name:     "remove-cron",
-				HelpText: "Add a cron job",
+				HelpText: "Remove a cron job",
 				UsageDetails: plugin.Usage{
 					Usage: "cf remove-cron",
 					Options: map[string]string{
@@ -62,20 +62,10 @@ func (c *Crontab) GetMetadata() plugin.PluginMetadata {
 				},
 			},
 			{
-				Name:     "backup-cron",
-				HelpText: "Backup cron table",
+				Name:     "save-crontab",
+				HelpText: "Save crontab table to the environment",
 				UsageDetails: plugin.Usage{
-					Usage: "cf backup-cron",
-				},
-			},
-			{
-				Name:     "restore-cron",
-				HelpText: "Restore cron table",
-				UsageDetails: plugin.Usage{
-					Usage: "cf restore-cron",
-					Options: map[string]string{
-						"file": "the file to restore from",
-					},
+					Usage: "cf save-crontab",
 				},
 			},
 		},
@@ -89,24 +79,30 @@ func (c *Crontab) CrontabEntries() []crontab.Task {
 	return *c.Entries
 }
 
+func (c *Crontab) ServerEntries(cliConnection plugin.CliConnection) ([]*crontab.Task, error) {
+	fmt.Printf("Discovering crontab server ...\n")
+	server, err := CrontabServerResolver(cliConnection)
+	if err != nil {
+		return nil, err
+	}
+	host, err := server.Host()
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("Getting crontab from %s ...\n", host)
+	entries, err := server.GetEntries()
+	if err != nil {
+		return nil, err
+	}
+	return entries, nil
+}
+
 func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 	switch args[0] {
 	case "crontab":
-		fmt.Printf("Discovering crontab server ...\n")
-		server, err := CrontabServerResolver(cliConnection)
+		entries, err := c.ServerEntries(cliConnection)
 		if err != nil {
-			fmt.Printf("error resolving server: %v\n", err)
-			return
-		}
-		host, err := server.Host()
-		if err != nil {
-			fmt.Printf("error resolving host: %v\n", err)
-			return
-		}
-		fmt.Printf("Getting crontab from %s ...\n", host)
-		entries, err := server.GetEntries()
-		if err != nil {
-			fmt.Printf("error resolving host: %v\n", err)
+			fmt.Printf("error getting server entries: %v\n", err)
 			return
 		}
 		t := table.NewWriter()
@@ -177,33 +173,18 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 			return
 		}
 		fmt.Printf("OK\n")
-	case "backup-cron":
-		data, err := json.Marshal(c.Entries)
+	case "save-crontab":
+		fmt.Printf("Saving crontab ...\n")
+		server, err := CrontabServerResolver(cliConnection)
 		if err != nil {
-			fmt.Printf("error: %v\n", err)
+			fmt.Printf("error resolving server: %v\n", err)
 			return
 		}
-		_ = ioutil.WriteFile(args[1], data, 0644)
-	case "restore-cron":
-		restore, err := ioutil.ReadFile(args[1])
-		if err != nil {
-			fmt.Printf("error: %v\n", err)
+		if err := server.SaveCrontab(); err != nil {
+			fmt.Printf("error saving crontab: %v\n", err)
 			return
 		}
-		var tasks []crontab.Task
-		err = json.Unmarshal(restore, &tasks)
-		if err != nil {
-			fmt.Printf("error: %v\n", err)
-			return
-		}
-		parts, err := crontab.EnvParts(tasks)
-		if err != nil {
-			fmt.Printf("error: %v\n", err)
-			return
-		}
-		for k, v := range parts {
-			fmt.Printf("  %s: %s\n", k, v)
-		}
+		fmt.Printf("OK\n")
 	case "CLI-MESSAGE-UNINSTALL":
 		fmt.Println("Thanks for using cf-crontab")
 	}

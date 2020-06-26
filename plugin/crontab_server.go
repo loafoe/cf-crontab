@@ -74,6 +74,24 @@ type appEnv struct {
 	Environment map[string]string `json:"environment_json"`
 }
 
+func (c CrontabServer) SaveCrontab() error {
+	entries, err := c.GetEntries()
+	if err != nil {
+		return err
+	}
+	parts, err := crontab.EnvParts(entries)
+	if err != nil {
+		return err
+	}
+	for k, v := range parts {
+		_, err := c.connection.CliCommandWithoutTerminalOutput("set-env", c.app.Name, k, v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (c CrontabServer) GetSecret() (string, error) {
 	envURL := fmt.Sprintf("/v2/apps/%s/env", c.app.Guid)
 	out, err := c.connection.CliCommandWithoutTerminalOutput("curl", envURL)

@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	maxPartSize = 4096
-	configTag   = "CRONTAB_CONFIG"
+	maxPartSize = 8192
+	configTag   = "CF_CRONTAB_CONFIG"
 )
 
 func LoadFromEnv() ([]Task, error) {
@@ -47,7 +47,7 @@ func LoadFromEnv() ([]Task, error) {
 	return entries, nil
 }
 
-func EnvParts(tasks []Task) (map[string]string, error) {
+func EnvParts(tasks []*Task) (map[string]string, error) {
 	parts := make(map[string]string)
 	data, err := json.Marshal(&tasks)
 	if err != nil {
