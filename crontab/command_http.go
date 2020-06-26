@@ -25,7 +25,11 @@ func (h Http) Run() {
 	client := http.DefaultClient
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("%d: %v\n", h.Task.EntryID, err)
+		if h.Task != nil {
+			fmt.Printf("%d: %v\n", h.Task.EntryID, err)
+		} else {
+			fmt.Printf("<EntryID>: %v\n", err)
+		}
 		return
 	}
 	if resp != nil {

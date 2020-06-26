@@ -3,14 +3,15 @@ package plugin
 import (
 	"encoding/json"
 	"fmt"
-	_ "github.com/jedib0t/go-pretty/text"
 	"io/ioutil"
 	"os"
 	"strconv"
 
+	_ "github.com/jedib0t/go-pretty/text"
+
 	"code.cloudfoundry.org/cli/plugin"
-	"github.com/philips-labs/cf-crontab/crontab"
 	"github.com/jedib0t/go-pretty/table"
+	"github.com/philips-labs/cf-crontab/crontab"
 )
 
 // Crontab implements the CF plugin interface
@@ -105,23 +106,7 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Printf("error getting server entries: %v\n", err)
 			return
 		}
-		t := table.NewWriter()
-		t.SetOutputMirror(os.Stdout)
-		t.SetStyle(table.StyleLight)
-		t.AppendHeader(table.Row{"#", "schedule", "type", "details"})
-		for _, e := range entries {
-			details := ""
-			switch e.Job.Type {
-			case "http":
-				details = fmt.Sprintf("%s %s", e.Job.Params["method"], e.Job.Params["url"])
-			case "ampq":
-			case "cartel":
-			default:
-				details = ""
-			}
-			t.AppendRow([]interface{}{e.EntryID, e.Schedule, e.Job.Type, details})
-		}
-		t.Render()
+		c.RenderEntries(entries)
 	case "add-cron":
 		if len(args) < 2 {
 			fmt.Printf("need json file with Entries\n")
@@ -138,9 +123,23 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Printf("error: %v\n", err)
 			return
 		}
-		for i, task := range tasks {
-			fmt.Printf("%d: %v\n", i, task)
+		if len(tasks) == 0 {
+			fmt.Printf("no tasks found. check your .json\n")
+			return
 		}
+		fmt.Printf("Adding %d entries ...\n", len(tasks))
+		server, err := CrontabServerResolver(cliConnection)
+		if err != nil {
+			fmt.Printf("error resolving server: %v\n", err)
+			return
+		}
+		entries, err := server.AddEntries(tasks)
+		if err != nil {
+			fmt.Printf("error adding entries: %v\n", err)
+			return
+		}
+		c.RenderEntries(entries)
+		fmt.Printf("OK\n")
 	case "remove-cron":
 		if len(args) < 2 {
 			fmt.Printf("need entryID\n")
@@ -188,4 +187,16 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 	case "CLI-MESSAGE-UNINSTALL":
 		fmt.Println("Thanks for using cf-crontab")
 	}
+}
+
+func (c *Crontab) RenderEntries(entries []*crontab.Task) {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleLight)
+	t.AppendHeader(table.Row{"#", "schedule", "type", "details"})
+	for _, e := range entries {
+		details := fmt.Sprintf("%v", e.Job)
+		t.AppendRow([]interface{}{e.EntryID, e.Schedule, e.Job.Type, details})
+	}
+	t.Render()
 }

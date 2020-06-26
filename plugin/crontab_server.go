@@ -1,24 +1,26 @@
 package plugin
 
 import (
-	"code.cloudfoundry.org/cli/plugin"
-	plugin_models "code.cloudfoundry.org/cli/plugin/models"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/philips-labs/cf-crontab/crontab"
-	"github.com/philips-labs/cf-crontab/server"
-	signer "github.com/philips-software/go-hsdp-signer"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"code.cloudfoundry.org/cli/plugin"
+	plugin_models "code.cloudfoundry.org/cli/plugin/models"
+	"github.com/philips-labs/cf-crontab/crontab"
+	"github.com/philips-labs/cf-crontab/server"
+	signer "github.com/philips-software/go-hsdp-signer"
 )
 
 type CrontabServer struct {
-	app *plugin_models.GetAppsModel
+	app        *plugin_models.GetAppsModel
 	connection plugin.CliConnection
 }
 
@@ -35,7 +37,7 @@ func (c CrontabServer) ServerRequest(method, endpoint string, body io.Reader) (*
 	if err != nil {
 		return nil, err
 	}
-	u, err := url.Parse("https://"+host+endpoint)
+	u, err := url.Parse("https://" + host + endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +57,7 @@ func (c CrontabServer) ServerRequest(method, endpoint string, body io.Reader) (*
 	if err != nil {
 		return nil, err
 	}
-	return  http.DefaultClient.Do(req)
+	return http.DefaultClient.Do(req)
 }
 
 func (c CrontabServer) GetToken() (string, error) {
@@ -153,6 +155,28 @@ func (c CrontabServer) DeleteEntry(index int) (bool, error) {
 	return false, errors.New(errResponse.Message)
 }
 
+func (c CrontabServer) AddEntries(tasks []crontab.Task) ([]*crontab.Task, error) {
+	data, err := json.Marshal(tasks)
+	if err != nil {
+		return nil, err
+	}
+	body := bytes.NewReader(data)
+	resp, err := c.ServerRequest("POST", "/entries", body)
+	if err != nil {
+		return nil, err
+	}
+	if resp == nil || resp.StatusCode != http.StatusOK {
+		return nil, errUnexpectedResponse
+	}
+	data, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	var entries []*crontab.Task
+	err = json.Unmarshal(data, &entries)
+	return entries, err
+}
+
 func CrontabServerResolver(cliConnection plugin.CliConnection) (*CrontabServer, error) {
 	apps, err := cliConnection.GetApps()
 	if err != nil {
@@ -161,7 +185,7 @@ func CrontabServerResolver(cliConnection plugin.CliConnection) (*CrontabServer, 
 	for _, app := range apps {
 		if app.Name == crontab.DefaultAppName {
 			return &CrontabServer{
-				app: &app,
+				app:        &app,
 				connection: cliConnection,
 			}, nil
 		}

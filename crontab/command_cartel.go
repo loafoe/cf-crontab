@@ -5,10 +5,11 @@ import (
 )
 
 type Cartel struct {
-	Command string
-	Tags string
-	Instance string
-	Action string
+	Command  string `json:"command""`
+	Tags     string `json:"tags"`
+	Instance string `json:"instance"`
+	Action   string `json:"action"`
+	Task     *Task  `json:"-"`
 }
 
 func (c Cartel) Run() {

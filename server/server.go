@@ -13,8 +13,9 @@ import (
 
 type ErrResponse struct {
 	Message string `json:"message"`
-	Code int `json:"code"`
+	Code    int    `json:"code"`
 }
+
 func entriesDeleteHandler(state *crontab.State) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		stringID := c.Param("entryID")
@@ -22,14 +23,14 @@ func entriesDeleteHandler(state *crontab.State) echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Message: "invalid entry",
-				Code: http.StatusBadRequest,
+				Code:    http.StatusBadRequest,
 			})
 		}
 		err = state.DeleteEntry(entryID)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Message: err.Error(),
-				Code: http.StatusBadRequest,
+				Code:    http.StatusBadRequest,
 			})
 		}
 		return c.String(http.StatusNoContent, "")
@@ -46,10 +47,20 @@ func entriesPostHandler(state *crontab.State) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var newEntries []crontab.Task
 		if err := c.Bind(&newEntries); err != nil {
-			return err
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Message: err.Error(),
+				Code:    http.StatusBadRequest,
+			})
 		}
-		state.AddEntries(newEntries)
-		return c.JSONPretty(http.StatusOK, newEntries, "  ")
+		fmt.Printf("Adding %d entries\n", len(newEntries))
+		entries, err := state.AddEntries(newEntries)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Message: err.Error(),
+				Code:    http.StatusBadRequest,
+			})
+		}
+		return c.JSON(http.StatusOK, entries)
 	}
 }
 
