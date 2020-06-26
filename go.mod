@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	code.cloudfoundry.org/cli v6.51.0+incompatible
-	github.com/cloudfoundry-community/gautocloud v1.1.5 // indirect
+	github.com/cloudfoundry-community/gautocloud v1.1.5
 	github.com/cloudfoundry-community/go-cfenv v1.18.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-openapi/strfmt v0.19.5 // indirect
@@ -15,6 +15,8 @@ require (
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
 	github.com/pelletier/go-toml v1.8.0 // indirect
+	github.com/philips-software/gautocloud-connectors v0.0.0-20200626075404-a77875b019e3
+	github.com/philips-software/go-hsdp-api v0.18.0
 	github.com/philips-software/go-hsdp-signer v1.3.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.6.0 // indirect
