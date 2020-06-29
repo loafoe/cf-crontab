@@ -1,5 +1,6 @@
 .idea/
 .vscode/
+dist/
 *.json
 *.sh
 cf-crontab
