@@ -11,6 +11,7 @@ type Amqp struct {
 	RoutingKey   string `json:"routing_key"`
 	Payload      string `json:"payload"`
 	ContentType  string `json:"content_type"`
+	Instance     string `json:"instance"`
 	Task         *Task  `json:"-"`
 }
 

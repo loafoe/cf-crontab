@@ -70,7 +70,7 @@ You define tasks using the below JSON. A more detailed description and of all su
 ```json
 [
   {
-    "schedule": "0 */10 * * * *",
+    "schedule": "* */10 * * * *",
     "job": {
       "type": "http",
       "command": {
