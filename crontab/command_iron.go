@@ -2,6 +2,7 @@ package crontab
 
 import (
 	"fmt"
+
 	"github.com/cloudfoundry-community/gautocloud"
 	"github.com/philips-software/gautocloud-connectors/hsdp"
 	"github.com/philips-software/go-hsdp-api/iron"
@@ -23,12 +24,28 @@ func (i Iron) Run() {
 		fmt.Printf("no iron service found. please bind one to cf-crontab\n")
 		return
 	}
+	payload := ""
+	for _, cluster := range client.Config.ClusterInfo {
+		if cluster.ClusterID == i.Cluster {
+			var err error
+			payload, err = cluster.Encrypt([]byte(i.Payload))
+			if err != nil {
+				fmt.Printf("failed to encrypt payload for cluster %s: %v\n", i.Cluster, err)
+				return
+			}
+			break
+		}
+	}
+	if payload == "" {
+		fmt.Printf("cluster not found: %s", i.Cluster)
+		return
+	}
 	switch i.Command {
 	case "queue":
 		task, _, err := client.Tasks.QueueTask(iron.Task{
 			CodeName: i.CodeName,
 			Cluster:  i.Cluster,
-			Payload:  i.Payload,
+			Payload:  payload,
 			Timeout:  i.Timeout,
 		})
 		if err != nil {
