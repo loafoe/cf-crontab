@@ -24,19 +24,19 @@ func (i Iron) Run() {
 		fmt.Printf("no iron service found. please bind one to cf-crontab\n")
 		return
 	}
-	payload := ""
+	encryptedPayload := ""
 	for _, cluster := range client.Config.ClusterInfo {
 		if cluster.ClusterID == i.Cluster {
 			var err error
-			payload, err = cluster.Encrypt([]byte(i.Payload))
+			encryptedPayload, err = cluster.Encrypt([]byte(i.Payload))
 			if err != nil {
-				fmt.Printf("failed to encrypt payload for cluster %s: %v\n", i.Cluster, err)
+				fmt.Printf("failed to encrypt encryptedPayload for cluster %s: %v\n", i.Cluster, err)
 				return
 			}
 			break
 		}
 	}
-	if payload == "" {
+	if encryptedPayload == "" {
 		fmt.Printf("cluster not found: %s", i.Cluster)
 		return
 	}
@@ -45,7 +45,7 @@ func (i Iron) Run() {
 		task, _, err := client.Tasks.QueueTask(iron.Task{
 			CodeName: i.CodeName,
 			Cluster:  i.Cluster,
-			Payload:  payload,
+			Payload:  encryptedPayload,
 			Timeout:  i.Timeout,
 		})
 		if err != nil {
@@ -58,5 +58,4 @@ func (i Iron) Run() {
 	default:
 		fmt.Printf("command `%v` is not supported\n", i.Command)
 	}
-	fmt.Printf("not implemented\n")
 }
