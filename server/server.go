@@ -2,13 +2,13 @@ package server
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/philips-labs/cf-crontab/crontab"
-	"github.com/spf13/viper"
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/labstack/echo/v4"
+	"github.com/philips-labs/cf-crontab/crontab"
+	"github.com/spf13/viper"
 )
 
 type ErrResponse struct {
@@ -69,7 +69,7 @@ func Start() {
 	// Config
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")
-	viper.SetEnvPrefix("cf_crontab")
+	viper.SetEnvPrefix("cf_standalone")
 	viper.SetDefault("secret", "")
 	viper.AutomaticEnv()
 	viper.AddConfigPath(".")
@@ -87,17 +87,7 @@ func Start() {
 	state.StartCron()
 
 	// Echo
-	secret := viper.GetString("secret")
-	if secret == "" {
-		fmt.Printf("secret is required\n")
-		return
-	}
 	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Use(HSDPValidator(crontab.SharedKey, secret))
-	e.GET("/entries", entriesGetHandler(state))
-	e.POST("/entries", entriesPostHandler(state))
-	e.DELETE("/entries/:entryID", entriesDeleteHandler(state))
 	usePort := os.Getenv("PORT")
 	if usePort == "" {
 		usePort = "8080"

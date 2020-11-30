@@ -1,6 +1,7 @@
 package crontab
 
 import (
+	"bytes"
 	"fmt"
 
 	"net/http"
@@ -15,7 +16,12 @@ type Http struct {
 }
 
 func (h Http) Run() {
-	req, err := http.NewRequest(h.Method, h.URL, nil)
+	payload := bytes.NewBufferString(h.Body)
+	if h.Body == "" {
+		payload = nil
+	}
+
+	req, err := http.NewRequest(h.Method, h.URL, payload)
 	if err != nil {
 		return
 	}
