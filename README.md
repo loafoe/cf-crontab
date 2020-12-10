@@ -31,6 +31,11 @@ cf push -f manifest.yml
 # Config
 For now you can only inject the config via the ENV:
 
+# Password
+
+```
+echo -n 'username:password'|base64
+```
 
 # Tasks
 You define tasks using the below JSON. A more detailed description and of all supported and planned tasks will follow soon. For now we have `http`:
@@ -43,7 +48,7 @@ You define tasks using the below JSON. A more detailed description and of all su
         "type": "http",
         "command": {
           "headers": {
-              "Authorization": "Basic cG9sbGVyLXdlbGxjZW50aXZlOnRlc3QtcG9sbGVyCg=="
+              "Authorization": "Basic BASE64"
           },  
           "body": "{ \"countToProcess\": 0, \"serverName\": \"string\"}",
           "method": "POST",
