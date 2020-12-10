@@ -60,6 +60,10 @@ You define tasks using the below JSON. A more detailed description and of all su
 ]
 ```
 
+### Standalone config
+
+Add above JSON struct to `CF_CRONTAB_CONFIG` environment variable
+
 # Contact / Getting help
 
 - andy.lo-a-foe@philips.com

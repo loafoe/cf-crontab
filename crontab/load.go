@@ -6,8 +6,7 @@ import (
 )
 
 const (
-	maxPartSize = 16384
-	configTag   = "CF_CRONTAB_CONFIG"
+	configTag = "CF_CRONTAB_CONFIG"
 )
 
 func LoadFromEnv() ([]Task, error) {
