@@ -24,10 +24,5 @@ jobs:
           containerRegistry: docker.na1.hsdp.io
 
       - script: |
-#          export DOCKER_BUILDKIT=1
-#          docker build --platform=local -o . git://github.com/docker/buildx
-#          mkdir -p ~/.docker/cli-plugins
-#          mv buildx ~/.docker/cli-plugins/docker-buildx
-#          export DOCKER_CLI_EXPERIMENTAL=enabled
           docker buildx build --push -f Dockerfile -t docker.na1.hsdp.io/phm-services/dm-cf-crontab:latest .
         displayName: 'Download Paas Prometheus Exporter'
