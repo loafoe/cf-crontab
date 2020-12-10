@@ -24,5 +24,6 @@ jobs:
           containerRegistry: docker.na1.hsdp.io
 
       - script: |
-          docker buildx build --push -f Dockerfile -t docker.na1.hsdp.io/phm-services/dm-cf-crontab:latest .
+          docker buildx build -f Dockerfile -t docker.na1.hsdp.io/phm-services/dm-cf-crontab:latest .
+          docker push docker.na1.hsdp.io/phm-services/dm-cf-crontab:latest
         displayName: 'Download Paas Prometheus Exporter'
