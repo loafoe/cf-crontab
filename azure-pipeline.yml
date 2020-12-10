@@ -26,4 +26,4 @@ jobs:
       - script: |
           docker buildx build -f Dockerfile -t docker.na1.hsdp.io/phm-services/dm-cf-crontab:latest .
           docker push docker.na1.hsdp.io/phm-services/dm-cf-crontab:latest
-        displayName: 'Download Paas Prometheus Exporter'
+        displayName: 'Create Docker CF-Crontab'
