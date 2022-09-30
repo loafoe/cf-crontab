@@ -17,7 +17,7 @@ require (
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
 	github.com/philips-software/gautocloud-connectors v0.4.0
 	github.com/philips-software/go-hsdp-api v0.20.0
-	github.com/philips-software/go-hsdp-signer v1.3.0
+	github.com/philips-software/go-hsdp-signer v1.4.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.6.0 // indirect
 	github.com/spf13/afero v1.3.0 // indirect
