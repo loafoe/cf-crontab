@@ -11,7 +11,7 @@ require (
 	github.com/golang/mock v1.4.3 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/labstack/echo/v4 v4.9.0
-	github.com/loafoe/go-rabbitmq v0.4.0
+	github.com/loafoe/go-rabbitmq v0.5.0
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
@@ -19,7 +19,6 @@ require (
 	github.com/philips-software/go-hsdp-api v0.20.0
 	github.com/philips-software/go-hsdp-signer v1.3.0
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/sirupsen/logrus v1.6.0 // indirect
 	github.com/spf13/afero v1.3.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
