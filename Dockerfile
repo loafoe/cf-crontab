@@ -1,18 +1,19 @@
-FROM golang:1.14.4 as builder
-WORKDIR /build
-COPY go.mod .
-COPY go.sum .
+# syntax = docker/dockerfile:1-experimental
+
+FROM --platform=${BUILDPLATFORM} golang:1.15.6-alpine AS build
+ARG TARGETOS
+ARG TARGETARCH
+WORKDIR /src
+ENV CGO_ENABLED=0
+COPY go.* .
 RUN go mod download
-
-# Build
 COPY . .
-RUN git rev-parse --short HEAD
-RUN GIT_COMMIT=$(git rev-parse --short HEAD) && \
-    CGO_ENABLED=0 go build -o cf-crontab -ldflags "-X main.GitCommit=${GIT_COMMIT}"
+RUN --mount=type=cache,target=/root/.cache/go-build \
+GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /out/app -ldflags "-X main.GitCommit=${GIT_COMMIT}" .
 
-FROM alpine:latest 
+FROM alpine:latest
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 WORKDIR /app
-COPY --from=builder /build/cf-crontab /app
+COPY --from=build /out/app /app
 EXPOSE 8080
-CMD ["/app/cf-crontab", "server"]
+CMD ["/app/app", "server"]

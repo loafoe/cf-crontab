@@ -1,4 +1,4 @@
-package plugin
+package client
 
 import (
 	"encoding/json"
@@ -7,14 +7,14 @@ import (
 	"os"
 	"strconv"
 
+	"code.cloudfoundry.org/cli/plugin"
 	_ "github.com/jedib0t/go-pretty/text"
 
-	"code.cloudfoundry.org/cli/plugin"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/philips-labs/cf-crontab/crontab"
 )
 
-// Crontab implements the CF plugin interface
+// Crontab implements the CF client interface
 type Crontab struct {
 	Entries *[]crontab.Task
 }
@@ -41,32 +41,32 @@ func (c *Crontab) GetMetadata() plugin.PluginMetadata {
 				},
 			},
 			{
-				Name:     "add-cron",
+				Name:     "crontab-add",
 				HelpText: "Add a cron job",
 				UsageDetails: plugin.Usage{
-					Usage: "cf add-cron",
+					Usage: "cf crontab-add",
 					Options: map[string]string{
 						"schedule": "the cron schedule",
 						"type":     "the job type [http,amqp,iron,etc]",
-						"params":   "job params",
+						"command":  "json payload",
 					},
 				},
 			},
 			{
-				Name:     "remove-cron",
+				Name:     "crontab-remove",
 				HelpText: "Remove a cron job",
 				UsageDetails: plugin.Usage{
-					Usage: "cf remove-cron",
+					Usage: "cf crontab-remove",
 					Options: map[string]string{
 						"index": "the index of the cron entry to remove",
 					},
 				},
 			},
 			{
-				Name:     "save-crontab",
+				Name:     "crontab-save",
 				HelpText: "Save crontab table to the environment",
 				UsageDetails: plugin.Usage{
-					Usage: "cf save-crontab",
+					Usage: "cf crontab-save",
 				},
 			},
 		},
@@ -107,7 +107,7 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 			return
 		}
 		c.RenderEntries(entries)
-	case "add-cron":
+	case "crontab-add":
 		if len(args) < 2 {
 			fmt.Printf("need json file with Entries\n")
 			return
@@ -140,7 +140,7 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 		}
 		c.RenderEntries(entries)
 		fmt.Printf("OK\n")
-	case "remove-cron":
+	case "crontab-remove":
 		if len(args) < 2 {
 			fmt.Printf("need entryID\n")
 			return
@@ -172,7 +172,7 @@ func (c *Crontab) Run(cliConnection plugin.CliConnection, args []string) {
 			return
 		}
 		fmt.Printf("OK\n")
-	case "save-crontab":
+	case "crontab-save":
 		fmt.Printf("Saving crontab ...\n")
 		server, err := CrontabServerResolver(cliConnection)
 		if err != nil {
