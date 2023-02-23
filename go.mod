@@ -14,7 +14,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/philips-software/gautocloud-connectors v0.4.0
 	github.com/philips-software/go-hsdp-api v0.20.0
-	github.com/philips-software/go-hsdp-signer v1.3.0
+	github.com/philips-software/go-hsdp-signer v1.4.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/viper v1.15.0
 	github.com/streadway/amqp v1.0.0
